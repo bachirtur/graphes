@@ -1,0 +1,2014 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithmes de Parcours de Graphes - NSI Terminale</title>
+    <style>
+/* ===== Variables CSS ===== */
+:root {
+    --primary-color: #2563eb;
+    --primary-dark: #1d4ed8;
+    --secondary-color: #10b981;
+    --accent-color: #f59e0b;
+    --danger-color: #ef4444;
+    --success-color: #22c55e;
+    --background: #f8fafc;
+    --card-bg: #ffffff;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --border-color: #e2e8f0;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--background);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+.page { display: none; min-height: 100vh; }
+.page.active { display: block; }
+
+/* Page d'accueil */
+.hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem;
+}
+
+.hero-content {
+    max-width: 800px;
+    text-align: center;
+    color: white;
+}
+
+.hero h1 {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.subtitle {
+    font-size: 1.5rem;
+    opacity: 0.9;
+    margin-bottom: 2rem;
+}
+
+.objectives-card {
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--text-primary);
+    padding: 2rem;
+    border-radius: 1rem;
+    text-align: left;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-lg);
+}
+
+.objectives-card h2 { color: var(--primary-color); margin-bottom: 1rem; }
+.objectives-card ul { list-style: none; padding-left: 0; }
+.objectives-card li {
+    padding: 0.5rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+}
+.objectives-card li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--secondary-color);
+    font-weight: bold;
+}
+
+.prerequisites {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.btn-primary {
+    background: white;
+    color: var(--primary-color);
+    border: none;
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: bold;
+    box-shadow: var(--shadow);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    background: #f0f0f0;
+}
+
+/* Navigation */
+.navbar {
+    position: sticky;
+    top: 0;
+    background: white;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--shadow);
+    z-index: 100;
+}
+
+.navbar button {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.navbar button:hover { background: var(--primary-dark); }
+.nav-title { font-weight: bold; color: var(--text-primary); }
+
+/* Layout du cours */
+.course-container {
+    display: flex;
+    max-width: 1400px;
+    margin: 0 auto;
+    gap: 2rem;
+    padding: 2rem;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 80px;
+    height: fit-content;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: var(--shadow);
+}
+
+.sidebar h3 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.toc { list-style: none; }
+.toc li { margin: 0.5rem 0; }
+.toc a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.3s;
+    display: block;
+    padding: 0.3rem 0;
+}
+.toc a:hover { color: var(--primary-color); }
+
+/* Contenu principal */
+.main-content { flex: 1; min-width: 0; }
+
+.section {
+    background: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+}
+
+.section h2 {
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+/* Cartes de contenu */
+.definition-card, .info-card, .algorithm-card, .explanation-card, .important-card, .comparison-card, .summary-card {
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    margin: 1.5rem 0;
+}
+
+.definition-card {
+    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    border-left: 4px solid #0ea5e9;
+}
+
+.info-card {
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    border-left: 4px solid var(--secondary-color);
+}
+
+.info-card.highlight {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-left: 4px solid var(--accent-color);
+}
+
+.algorithm-card {
+    background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+    border-left: 4px solid #8b5cf6;
+}
+
+.explanation-card {
+    background: #f8fafc;
+    border: 1px solid var(--border-color);
+}
+
+.important-card {
+    background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
+    border-left: 4px solid var(--danger-color);
+}
+
+.comparison-card {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border-left: 4px solid #22c55e;
+}
+
+.summary-card {
+    background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%);
+    border-left: 4px solid #eab308;
+}
+
+/* Code */
+pre {
+    background: #1e293b;
+    color: #e2e8f0;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin-top: 1rem;
+}
+
+code {
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* Toggle content */
+.toggle-container { margin-bottom: 0.5rem; }
+.toggle-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+.toggle-btn:hover { background: var(--primary-dark); }
+.hidden-content { display: none; margin-top: 1rem; }
+.hidden-content.visible {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Highlight box */
+.highlight-box {
+    background: white;
+    border: 2px solid var(--primary-color);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+}
+.highlight-box h3 { color: var(--primary-color); margin-bottom: 1rem; }
+.two-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+.column {
+    background: var(--background);
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+.column h4 { color: var(--primary-dark); margin-bottom: 0.5rem; }
+
+/* Graphe */
+.graph-reference, .exercise-graph-reference {
+    text-align: center;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 1rem;
+    margin: 1.5rem 0;
+    box-shadow: var(--shadow);
+}
+.graph-container { display: flex; justify-content: center; margin: 1rem 0; }
+.graph-notation {
+    font-style: italic;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+}
+
+/* Simulation */
+.simulation-container {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 2px solid #0ea5e9;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin: 2rem 0;
+}
+.simulation-container h3 { color: #0369a1; margin-bottom: 1rem; }
+
+.simulation-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 0.5rem;
+}
+.simulation-controls label { font-weight: 500; margin-right: 0.25rem; }
+.simulation-controls select {
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.25rem;
+    margin-right: 1rem;
+}
+
+.btn-simulation {
+    background: var(--secondary-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.btn-simulation:hover { background: #059669; }
+
+.btn-step {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.btn-step:hover { background: var(--primary-dark); }
+
+.btn-reset {
+    background: var(--text-secondary);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.btn-reset:hover { background: #475569; }
+
+.simulation-display {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.graph-visual {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.data-structures { display: flex; flex-direction: column; gap: 1rem; }
+
+.queue-display, .stack-display, .visited-display, .chain-display, .result-display {
+    background: white;
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+.queue-display h4, .stack-display h4, .visited-display h4, .chain-display h4, .result-display h4 {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.queue, .stack, .visited, .chain {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    min-height: 40px;
+}
+
+.queue-item, .stack-item, .visited-item, .chain-item {
+    background: var(--primary-color);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.25rem;
+    font-weight: bold;
+    animation: pop 0.3s ease;
+}
+
+@keyframes pop {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.result {
+    font-weight: bold;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    text-align: center;
+}
+.result.success { background: #dcfce7; color: #166534; }
+.result.failure { background: #fee2e2; color: #991b1b; }
+
+.step-explanation {
+    background: white;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    min-height: 60px;
+}
+
+/* Couleurs des sommets */
+.color-white { color: #64748b; }
+.color-black { color: #1e293b; font-weight: bold; }
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+th, td { padding: 0.75rem; text-align: center; border: 1px solid var(--border-color); }
+th { background: var(--primary-color); color: white; }
+tr:nth-child(even) { background: var(--background); }
+.distance-table { margin-top: 1rem; }
+.distance-table h4 { margin-bottom: 0.5rem; }
+.comparison-table th { background: var(--secondary-color); }
+
+/* Page exercices */
+.exercises-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+.exercises-container h1 {
+    text-align: center;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+.exercises-intro {
+    text-align: center;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+}
+.exercise-graph-reference { margin-bottom: 2rem; }
+
+.exercise-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+}
+.exercise-card h2 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border-color);
+}
+.exercise-content { margin-top: 1rem; }
+.answer-section { margin: 1.5rem 0; }
+.answer-section label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+.answer-section input[type="text"] {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+.answer-section input[type="text"]:focus { outline: none; border-color: var(--primary-color); }
+
+.button-group { display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap; }
+
+.btn-check {
+    background: var(--secondary-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+.btn-check:hover { background: #059669; transform: translateY(-2px); }
+
+.btn-solution {
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+.btn-solution:hover { background: #d97706; transform: translateY(-2px); }
+
+/* Quiz */
+.quiz-question { margin: 1.5rem 0; }
+.quiz-options { display: flex; flex-direction: column; gap: 0.75rem; margin: 1rem 0; }
+.quiz-options label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: var(--background);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 2px solid transparent;
+}
+.quiz-options label:hover { background: #e0f2fe; border-color: var(--primary-color); }
+.quiz-options input[type="radio"] { width: 18px; height: 18px; cursor: pointer; }
+
+/* Feedback */
+.feedback {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+    font-weight: 500;
+}
+.feedback.hidden { display: none; }
+.feedback.correct { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+.feedback.incorrect { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+.feedback.partial { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+
+/* Solution */
+.solution {
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+.solution.hidden { display: none; }
+.solution h4 { color: #166534; margin-bottom: 1rem; }
+.solution h5 { color: #15803d; margin: 1rem 0 0.5rem; }
+.solution table { margin: 1rem 0; }
+
+/* Final message */
+.final-message {
+    text-align: center;
+    padding: 3rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 1rem;
+    color: white;
+    margin-top: 2rem;
+}
+.final-message h2 { font-size: 2rem; margin-bottom: 1rem; }
+.final-message .btn-primary { margin-top: 1.5rem; }
+
+/* Summary */
+.summary-item {
+    background: white;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+}
+.summary-item h4 { color: var(--primary-color); margin-bottom: 0.5rem; }
+.comparison-final { margin: 2rem 0; }
+.comparison-final h3 { color: var(--primary-color); margin-bottom: 1rem; }
+.next-steps {
+    background: #f0f9ff;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin: 2rem 0;
+}
+.next-steps h3 { color: #0369a1; margin-bottom: 1rem; }
+
+/* Footer */
+footer {
+    background: var(--text-primary);
+    color: white;
+    text-align: center;
+    padding: 1.5rem;
+    margin-top: auto;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .course-container { flex-direction: column; }
+    .sidebar { width: 100%; position: relative; top: 0; }
+    .simulation-display { grid-template-columns: 1fr; }
+    .two-columns { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+    .hero h1 { font-size: 2rem; }
+    .subtitle { font-size: 1.2rem; }
+    .navbar { flex-direction: column; gap: 0.5rem; padding: 1rem; }
+    .section { padding: 1.5rem; }
+    .simulation-controls { flex-direction: column; align-items: stretch; }
+    .button-group { flex-direction: column; }
+    table { font-size: 0.85rem; }
+    th, td { padding: 0.5rem 0.25rem; }
+}
+    </style>
+</head>
+<body>
+    <!-- Page d'accueil -->
+    <div id="home-page" class="page active">
+        <div class="hero">
+            <div class="hero-content">
+                <h1>🔍 Algorithmes de Parcours de Graphes</h1>
+                <p class="subtitle">Cours interactif - NSI Terminale</p>
+                
+                <div class="objectives-card">
+                    <h2>📚 Objectifs pédagogiques</h2>
+                    <ul>
+                        <li>Comprendre les algorithmes de parcours en <strong>largeur d'abord</strong> (BFS)</li>
+                        <li>Comprendre les algorithmes de parcours en <strong>profondeur d'abord</strong> (DFS)</li>
+                        <li>Savoir utiliser les structures <strong>File</strong> et <strong>Pile</strong></li>
+                        <li>Détecter les <strong>cycles</strong> dans un graphe</li>
+                        <li>Trouver une <strong>chaîne</strong> entre deux sommets</li>
+                    </ul>
+                </div>
+                
+                <div class="prerequisites">
+                    <p>💡 <em>Il est conseillé de relire au moins une fois le cours consacré aux graphes avant de commencer.</em></p>
+                </div>
+                
+                <button class="btn-primary" onclick="showPage('course-page')">
+                    Accéder au cours →
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page du cours -->
+    <div id="course-page" class="page">
+        <nav class="navbar">
+            <button onclick="showPage('home-page')">🏠 Accueil</button>
+            <span class="nav-title">Algorithmes de Parcours de Graphes</span>
+            <button onclick="showPage('exercises-page')">📝 Exercices</button>
+        </nav>
+
+        <div class="course-container">
+            <aside class="sidebar">
+                <h3>📑 Sommaire</h3>
+                <ul class="toc">
+                    <li><a href="#intro">Introduction</a></li>
+                    <li><a href="#bfs">Parcours en largeur</a></li>
+                    <li><a href="#dfs">Parcours en profondeur</a></li>
+                    <li><a href="#dfs-iterative">DFS itératif</a></li>
+                    <li><a href="#cycles">Détection de cycles</a></li>
+                    <li><a href="#chain">Recherche de chaîne</a></li>
+                    <li><a href="#summary">Synthèse</a></li>
+                </ul>
+            </aside>
+
+            <main class="main-content">
+                <!-- Introduction -->
+                <section id="intro" class="section">
+                    <h2>Introduction aux parcours de graphes</h2>
+                    
+                    <div class="definition-card">
+                        <h3>💡 Qu'est-ce qu'un parcours de graphe ?</h3>
+                        <p>L'idée du "parcours" est de <strong>"visiter" tous les sommets</strong> d'un graphe en partant d'un sommet quelconque.</p>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3>🎯 Applications</h3>
+                        <p>Ces algorithmes de parcours sont à la base de nombreux algorithmes très utilisés :</p>
+                        <ul>
+                            <li>Routage des paquets de données dans un réseau</li>
+                            <li>Découverte du chemin le plus court pour aller d'une ville à une autre</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="highlight-box">
+                        <h3>📌 Les 2 méthodes de parcours</h3>
+                        <div class="two-columns">
+                            <div class="column">
+                                <h4>1️⃣ Parcours en largeur d'abord</h4>
+                                <p>(Breadth-First Search - BFS)</p>
+                                <p>Utilise une <strong>FILE</strong></p>
+                            </div>
+                            <div class="column">
+                                <h4>2️⃣ Parcours en profondeur d'abord</h4>
+                                <p>(Depth-First Search - DFS)</p>
+                                <p>Utilise une <strong>PILE</strong> ou la <strong>récursivité</strong></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="graph-reference">
+                        <h3>📊 Graphe de référence pour tout le cours</h3>
+                        <div class="graph-container">
+                            <canvas id="main-graph" width="500" height="350"></canvas>
+                        </div>
+                        <p class="graph-notation">G(V, E) avec V = {A, B, C, D, E, F, G, H, I} et E = ensemble des arêtes</p>
+                    </div>
+
+                    <div class="definition-card">
+                        <h3>🔤 Notations et vocabulaire</h3>
+                        <ul>
+                            <li><strong>G(V, E)</strong> : un graphe avec V l'ensemble des sommets et E l'ensemble des arêtes</li>
+                            <li><strong>Adjacent / Voisin</strong> : un sommet u est adjacent à un sommet v si u et v sont reliés par une arête</li>
+                            <li><strong>Couleur</strong> : chaque sommet possède un attribut couleur (blanc ou noir)
+                                <ul>
+                                    <li><span class="color-white">⚪ Blanc</span> : sommet non encore découvert</li>
+                                    <li><span class="color-black">⚫ Noir</span> : sommet déjà découvert</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </section>
+
+                <!-- Parcours en largeur -->
+                <section id="bfs" class="section">
+                    <h2>Parcours en largeur d'abord (BFS)</h2>
+                    
+                    <div class="algorithm-card">
+                        <h3>📜 Algorithme du parcours en largeur</h3>
+                        <div class="toggle-container">
+                            <button class="toggle-btn" onclick="toggleContent('bfs-algo')">Afficher l'algorithme</button>
+                        </div>
+                        <div id="bfs-algo" class="hidden-content">
+                            <pre><code>VARIABLE
+  G : un graphe
+  s : noeud (origine)
+  u : noeud
+  v : noeud
+  f : file (initialement vide)
+  
+// On part du principe que pour tout sommet u du graphe G,
+// u.couleur = blanc à l'origine
+
+DEBUT
+  s.couleur ← noir
+  enfiler(s, f)
+  
+  tant que f non vide :
+    u ← défiler(f)
+    pour chaque sommet v adjacent au sommet u :
+      si v.couleur n'est pas noir :
+        v.couleur ← noir
+        enfiler(v, f)
+      fin si
+    fin pour
+  fin tant que
+FIN</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="explanation-card">
+                        <h3>🔍 Explication étape par étape</h3>
+                        <ol>
+                            <li>On marque le sommet de départ <strong>s</strong> en noir (découvert)</li>
+                            <li>On l'ajoute dans la <strong>file</strong></li>
+                            <li>Tant que la file n'est pas vide :
+                                <ul>
+                                    <li>On retire le premier élément de la file (u)</li>
+                                    <li>Pour chaque voisin v de u non encore découvert :
+                                        <ul>
+                                            <li>On le marque en noir</li>
+                                            <li>On l'ajoute à la file</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ol>
+                    </div>
+
+                    <!-- Simulation BFS -->
+                    <div class="simulation-container">
+                        <h3>🎮 Simulation interactive - Parcours en largeur</h3>
+                        <div class="simulation-controls">
+                            <label for="bfs-start">Sommet de départ :</label>
+                            <select id="bfs-start">
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                                <option value="E">E</option>
+                                <option value="F">F</option>
+                                <option value="G">G</option>
+                                <option value="H">H</option>
+                                <option value="I">I</option>
+                            </select>
+                            <button onclick="startBFSSimulation()" class="btn-simulation">▶ Démarrer</button>
+                            <button onclick="stepBFS()" class="btn-step">⏭ Étape suivante</button>
+                            <button onclick="resetBFSSimulation()" class="btn-reset">🔄 Réinitialiser</button>
+                        </div>
+                        <div class="simulation-display">
+                            <div class="graph-visual">
+                                <canvas id="bfs-graph" width="450" height="300"></canvas>
+                            </div>
+                            <div class="data-structures">
+                                <div class="queue-display">
+                                    <h4>📥 File (FIFO)</h4>
+                                    <div id="bfs-queue" class="queue"></div>
+                                </div>
+                                <div class="visited-display">
+                                    <h4>✅ Ordre de découverte</h4>
+                                    <div id="bfs-visited" class="visited"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="bfs-explanation" class="step-explanation"></div>
+                    </div>
+
+                    <div class="important-card">
+                        <h3>⚠️ Propriété importante</h3>
+                        <p>Dans le cas d'un parcours en largeur d'abord, on <strong>découvre d'abord tous les sommets situés à une distance k</strong> du sommet origine avant de commencer la découverte des sommets situés à une distance k+1.</p>
+                        
+                        <div class="distance-table">
+                            <h4>Exemple avec départ en A :</h4>
+                            <table>
+                                <tr>
+                                    <th>Sommets</th>
+                                    <td>A</td><td>B</td><td>F</td><td>C</td><td>D</td><td>G</td><td>H</td><td>E</td><td>I</td>
+                                </tr>
+                                <tr>
+                                    <th>Distance depuis A</th>
+                                    <td>0</td><td>1</td><td>1</td><td>2</td><td>2</td><td>2</td><td>2</td><td>3</td><td>3</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Parcours en profondeur -->
+                <section id="dfs" class="section">
+                    <h2>Parcours en profondeur d'abord (DFS) - Version récursive</h2>
+                    
+                    <div class="algorithm-card">
+                        <h3>📜 Algorithme du parcours en profondeur (récursif)</h3>
+                        <div class="toggle-container">
+                            <button class="toggle-btn" onclick="toggleContent('dfs-algo')">Afficher l'algorithme</button>
+                        </div>
+                        <div id="dfs-algo" class="hidden-content">
+                            <pre><code>VARIABLE
+  G : un graphe
+  u : noeud
+  v : noeud
+  
+// On part du principe que pour tout sommet u du graphe G,
+// u.couleur = blanc à l'origine
+
+DEBUT
+PARCOURS-PROFONDEUR(G, u) :
+  u.couleur ← noir
+  pour chaque sommet v adjacent au sommet u :
+    si v.couleur n'est pas noir :
+      PARCOURS-PROFONDEUR(G, v)
+    fin si
+  fin pour
+FIN</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="info-card highlight">
+                        <h3>💡 Remarque importante</h3>
+                        <p>Le parcours en profondeur utilise une <strong>fonction récursive</strong>. L'extrême simplicité de cet algorithme est souvent le cas avec les algorithmes récursifs.</p>
+                    </div>
+
+                    <div class="explanation-card">
+                        <h3>🔍 Principe du parcours en profondeur</h3>
+                        <p>On va chercher à aller <strong>"le plus loin possible"</strong> dans le graphe.</p>
+                        <p>Exemple : A → B → C → E → I → D</p>
+                        <p>Quand on tombe sur un <strong>"cul-de-sac"</strong> (tous les voisins sont déjà découverts), on revient en arrière pour explorer une autre branche.</p>
+                    </div>
+
+                    <!-- Simulation DFS récursif -->
+                    <div class="simulation-container">
+                        <h3>🎮 Simulation interactive - Parcours en profondeur (récursif)</h3>
+                        <div class="simulation-controls">
+                            <label for="dfs-start">Sommet de départ :</label>
+                            <select id="dfs-start">
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                                <option value="E">E</option>
+                                <option value="F">F</option>
+                                <option value="G">G</option>
+                                <option value="H">H</option>
+                                <option value="I">I</option>
+                            </select>
+                            <button onclick="startDFSSimulation()" class="btn-simulation">▶ Démarrer</button>
+                            <button onclick="stepDFS()" class="btn-step">⏭ Étape suivante</button>
+                            <button onclick="resetDFSSimulation()" class="btn-reset">🔄 Réinitialiser</button>
+                        </div>
+                        <div class="simulation-display">
+                            <div class="graph-visual">
+                                <canvas id="dfs-graph" width="450" height="300"></canvas>
+                            </div>
+                            <div class="data-structures">
+                                <div class="stack-display">
+                                    <h4>📚 Pile d'appels récursifs</h4>
+                                    <div id="dfs-stack" class="stack"></div>
+                                </div>
+                                <div class="visited-display">
+                                    <h4>✅ Ordre de découverte</h4>
+                                    <div id="dfs-visited" class="visited"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="dfs-explanation" class="step-explanation"></div>
+                    </div>
+                </section>
+
+                <!-- DFS itératif -->
+                <section id="dfs-iterative" class="section">
+                    <h2>Parcours en profondeur d'abord - Version itérative</h2>
+                    
+                    <div class="info-card">
+                        <h3>💡 Alternative à la récursivité</h3>
+                        <p>L'utilisation d'un algorithme récursif n'est pas une obligation pour le parcours en profondeur. On peut utiliser une <strong>pile</strong> explicite.</p>
+                    </div>
+
+                    <div class="algorithm-card">
+                        <h3>📜 Algorithme du parcours en profondeur (itératif)</h3>
+                        <div class="toggle-container">
+                            <button class="toggle-btn" onclick="toggleContent('dfs-iter-algo')">Afficher l'algorithme</button>
+                        </div>
+                        <div id="dfs-iter-algo" class="hidden-content">
+                            <pre><code>VARIABLE
+  s : noeud (origine)
+  G : un graphe
+  u : noeud
+  v : noeud
+  p : pile (pile vide au départ)
+  
+// On part du principe que pour tout sommet u du graphe G,
+// u.couleur = blanc à l'origine
+
+DEBUT
+  s.couleur ← noir
+  piler(s, p)
+  
+  tant que p n'est pas vide :
+    u ← dépiler(p)
+    pour chaque sommet v adjacent au sommet u :
+      si v.couleur n'est pas noir :
+        v.couleur ← noir
+        piler(v, p)
+      fin si
+    fin pour
+  fin tant que
+FIN</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="comparison-card">
+                        <h3>🔄 Comparaison BFS vs DFS itératif</h3>
+                        <p>La version itérative du parcours en profondeur ressemble beaucoup à l'algorithme du parcours en largeur. On a juste <strong>remplacé la file par une pile</strong>.</p>
+                        <table class="comparison-table">
+                            <tr>
+                                <th>Parcours en largeur (BFS)</th>
+                                <th>Parcours en profondeur (DFS)</th>
+                            </tr>
+                            <tr>
+                                <td>Utilise une <strong>FILE</strong> (FIFO)</td>
+                                <td>Utilise une <strong>PILE</strong> (LIFO)</td>
+                            </tr>
+                            <tr>
+                                <td>enfiler / défiler</td>
+                                <td>piler / dépiler</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Simulation DFS itératif -->
+                    <div class="simulation-container">
+                        <h3>🎮 Simulation interactive - Parcours en profondeur (itératif)</h3>
+                        <div class="simulation-controls">
+                            <label for="dfs-iter-start">Sommet de départ :</label>
+                            <select id="dfs-iter-start">
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                                <option value="E">E</option>
+                                <option value="F">F</option>
+                                <option value="G">G</option>
+                                <option value="H">H</option>
+                                <option value="I">I</option>
+                            </select>
+                            <button onclick="startDFSIterSimulation()" class="btn-simulation">▶ Démarrer</button>
+                            <button onclick="stepDFSIter()" class="btn-step">⏭ Étape suivante</button>
+                            <button onclick="resetDFSIterSimulation()" class="btn-reset">🔄 Réinitialiser</button>
+                        </div>
+                        <div class="simulation-display">
+                            <div class="graph-visual">
+                                <canvas id="dfs-iter-graph" width="450" height="300"></canvas>
+                            </div>
+                            <div class="data-structures">
+                                <div class="stack-display">
+                                    <h4>📚 Pile (LIFO)</h4>
+                                    <div id="dfs-iter-stack" class="stack"></div>
+                                </div>
+                                <div class="visited-display">
+                                    <h4>✅ Ordre de découverte</h4>
+                                    <div id="dfs-iter-visited" class="visited"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="dfs-iter-explanation" class="step-explanation"></div>
+                    </div>
+                </section>
+
+                <!-- Cycles -->
+                <section id="cycles" class="section">
+                    <h2>Détection de cycles dans un graphe</h2>
+                    
+                    <div class="definition-card">
+                        <h3>📖 Rappel de définitions</h3>
+                        <ul>
+                            <li><strong>Chaîne</strong> : une suite d'arêtes consécutives dans un graphe, comme si on se promenait sur le graphe. On la désigne par les lettres des sommets qu'elle comporte.</li>
+                            <li><strong>Cycle</strong> : une chaîne qui commence et se termine au même sommet.</li>
+                        </ul>
+                    </div>
+
+                    <div class="info-card">
+                        <h3>🎯 Pourquoi détecter les cycles ?</h3>
+                        <p>Par exemple, pour savoir s'il est possible d'effectuer un parcours qui revient à son point de départ sans être obligé de faire demi-tour.</p>
+                    </div>
+
+                    <div class="algorithm-card">
+                        <h3>📜 Algorithme de détection de cycle</h3>
+                        <div class="toggle-container">
+                            <button class="toggle-btn" onclick="toggleContent('cycle-algo')">Afficher l'algorithme</button>
+                        </div>
+                        <div id="cycle-algo" class="hidden-content">
+                            <pre><code>VARIABLE
+  s : noeud (noeud quelconque)
+  G : un graphe
+  u : noeud
+  v : noeud
+  p : pile (vide au départ)
+  
+// On part du principe que pour tout sommet u du graphe G,
+// u.couleur = blanc à l'origine
+
+DEBUT
+CYCLE():
+  piler(s, p)
+  
+  tant que p n'est pas vide :
+    u ← dépiler(p)
+    pour chaque sommet v adjacent au sommet u :
+      si v.couleur n'est pas noir :
+        piler(v, p)
+      fin si
+    fin pour
+    si u est noir :
+      renvoie Vrai
+    sinon :
+      u.couleur ← noir
+    fin si
+  fin tant que
+  renvoie Faux
+FIN</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="explanation-card">
+                        <h3>🔍 Explication de l'algorithme</h3>
+                        <ul>
+                            <li>Si le graphe contient au moins un cycle : l'algorithme renvoie <strong>Vrai</strong></li>
+                            <li>Si le graphe ne contient aucun cycle : l'algorithme renvoie <strong>Faux</strong></li>
+                        </ul>
+                        <p>La différence avec le parcours en profondeur classique : on vérifie si le sommet dépilé est déjà noir <strong>après</strong> l'avoir dépilé. Si un sommet déjà visité est rencontré, c'est qu'on a trouvé un cycle !</p>
+                    </div>
+
+                    <!-- Simulation Cycle -->
+                    <div class="simulation-container">
+                        <h3>🎮 Simulation interactive - Détection de cycle</h3>
+                        <div class="simulation-controls">
+                            <label for="cycle-start">Sommet de départ :</label>
+                            <select id="cycle-start">
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                                <option value="E">E</option>
+                                <option value="F">F</option>
+                                <option value="G">G</option>
+                                <option value="H">H</option>
+                                <option value="I">I</option>
+                            </select>
+                            <button onclick="startCycleSimulation()" class="btn-simulation">▶ Démarrer</button>
+                            <button onclick="stepCycle()" class="btn-step">⏭ Étape suivante</button>
+                            <button onclick="resetCycleSimulation()" class="btn-reset">🔄 Réinitialiser</button>
+                        </div>
+                        <div class="simulation-display">
+                            <div class="graph-visual">
+                                <canvas id="cycle-graph" width="450" height="300"></canvas>
+                            </div>
+                            <div class="data-structures">
+                                <div class="stack-display">
+                                    <h4>📚 Pile</h4>
+                                    <div id="cycle-stack" class="stack"></div>
+                                </div>
+                                <div class="result-display">
+                                    <h4>🔍 Résultat</h4>
+                                    <div id="cycle-result" class="result">En attente...</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="cycle-explanation" class="step-explanation"></div>
+                    </div>
+                </section>
+
+                <!-- Recherche de chaîne -->
+                <section id="chain" class="section">
+                    <h2>Recherche d'une chaîne entre deux sommets</h2>
+                    
+                    <div class="info-card">
+                        <h3>🎯 Importance de cet algorithme</h3>
+                        <p>Les algorithmes de recherche de chaîne ont une grande importance. Dans la plupart des cas, ils travaillent sur des <strong>graphes pondérés</strong> (par exemple pour rechercher la route dans un logiciel de cartographie).</p>
+                        <p>On peut citer l'<strong>algorithme de Dijkstra</strong> ou encore l'<strong>algorithme de Bellman-Ford</strong> qui recherchent le chemin le plus court.</p>
+                    </div>
+
+                    <div class="algorithm-card">
+                        <h3>📜 Algorithme de recherche de chaîne</h3>
+                        <div class="toggle-container">
+                            <button class="toggle-btn" onclick="toggleContent('chain-algo')">Afficher l'algorithme</button>
+                        </div>
+                        <div id="chain-algo" class="hidden-content">
+                            <pre><code>VARIABLE
+  G : un graphe
+  start : noeud (noeud de départ)
+  end : noeud (noeud d'arrivée)
+  u : noeud
+  chaine : ensemble de noeuds (initialement vide)
+  
+DEBUT
+TROUVE-CHAINE(G, start, end, chaine):
+  chaine = chaine ∪ start  // ajouter start à l'ensemble chaine
+  
+  si start est identique à end :
+    renvoie chaine
+  fin si
+  
+  pour chaque sommet u adjacent au sommet start :
+    si u n'appartient pas à chaine :
+      nchemin = TROUVE-CHAINE(G, u, end, chaine)
+      si nchemin non vide :
+        renvoie nchemin
+      fin si
+    fin si
+  fin pour
+  
+  renvoie NIL
+FIN</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="info-card highlight">
+                        <h3>💡 Remarque</h3>
+                        <p>Cet algorithme est basé sur un <strong>parcours en profondeur d'abord</strong>.</p>
+                    </div>
+
+                    <!-- Simulation Chaîne -->
+                    <div class="simulation-container">
+                        <h3>🎮 Simulation interactive - Recherche de chaîne</h3>
+                        <div class="simulation-controls">
+                            <label for="chain-start">Départ :</label>
+                            <select id="chain-start">
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                                <option value="E">E</option>
+                                <option value="F">F</option>
+                                <option value="G">G</option>
+                                <option value="H">H</option>
+                                <option value="I">I</option>
+                            </select>
+                            <label for="chain-end">Arrivée :</label>
+                            <select id="chain-end">
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                                <option value="E">E</option>
+                                <option value="F">F</option>
+                                <option value="G">G</option>
+                                <option value="H">H</option>
+                                <option value="I" selected>I</option>
+                            </select>
+                            <button onclick="startChainSimulation()" class="btn-simulation">▶ Démarrer</button>
+                            <button onclick="stepChain()" class="btn-step">⏭ Étape suivante</button>
+                            <button onclick="resetChainSimulation()" class="btn-reset">🔄 Réinitialiser</button>
+                        </div>
+                        <div class="simulation-display">
+                            <div class="graph-visual">
+                                <canvas id="chain-graph" width="450" height="300"></canvas>
+                            </div>
+                            <div class="data-structures">
+                                <div class="chain-display">
+                                    <h4>🔗 Chaîne en construction</h4>
+                                    <div id="chain-path" class="chain"></div>
+                                </div>
+                                <div class="result-display">
+                                    <h4>🎯 Résultat</h4>
+                                    <div id="chain-result" class="result">En attente...</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="chain-explanation" class="step-explanation"></div>
+                    </div>
+                </section>
+
+                <!-- Synthèse -->
+                <section id="summary" class="section">
+                    <h2>📝 Synthèse et révision</h2>
+                    
+                    <div class="summary-card">
+                        <h3>🔑 Points clés à retenir</h3>
+                        
+                        <div class="summary-item">
+                            <h4>1. Parcours en largeur d'abord (BFS)</h4>
+                            <ul>
+                                <li>Utilise une <strong>FILE</strong> (FIFO)</li>
+                                <li>Découvre les sommets par niveaux de distance</li>
+                                <li>Tous les sommets à distance k avant ceux à distance k+1</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="summary-item">
+                            <h4>2. Parcours en profondeur d'abord (DFS)</h4>
+                            <ul>
+                                <li>Utilise une <strong>PILE</strong> (LIFO) ou la <strong>récursivité</strong></li>
+                                <li>Explore "le plus loin possible" avant de revenir en arrière</li>
+                                <li>Remonte quand on atteint un cul-de-sac</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="summary-item">
+                            <h4>3. Détection de cycles</h4>
+                            <ul>
+                                <li>Basé sur le parcours en profondeur</li>
+                                <li>Un cycle est détecté si on rencontre un sommet déjà visité</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="summary-item">
+                            <h4>4. Recherche de chaîne</h4>
+                            <ul>
+                                <li>Algorithme récursif basé sur DFS</li>
+                                <li>Base des algorithmes de plus court chemin (Dijkstra, Bellman-Ford)</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="comparison-final">
+                        <h3>📊 Tableau comparatif</h3>
+                        <table>
+                            <tr>
+                                <th>Critère</th>
+                                <th>BFS (Largeur)</th>
+                                <th>DFS (Profondeur)</th>
+                            </tr>
+                            <tr>
+                                <td>Structure de données</td>
+                                <td>File (FIFO)</td>
+                                <td>Pile (LIFO) / Récursivité</td>
+                            </tr>
+                            <tr>
+                                <td>Ordre de visite</td>
+                                <td>Par niveaux</td>
+                                <td>En profondeur</td>
+                            </tr>
+                            <tr>
+                                <td>Plus court chemin (non pondéré)</td>
+                                <td>✅ Oui</td>
+                                <td>❌ Non garanti</td>
+                            </tr>
+                            <tr>
+                                <td>Mémoire utilisée</td>
+                                <td>Plus importante</td>
+                                <td>Moins importante</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="next-steps">
+                        <h3>📚 Pour aller plus loin</h3>
+                        <ul>
+                            <li>Algorithme de <strong>Dijkstra</strong> pour le plus court chemin pondéré</li>
+                            <li>Algorithme de <strong>Bellman-Ford</strong></li>
+                            <li>Applications : GPS, routage réseau, jeux vidéo</li>
+                        </ul>
+                    </div>
+
+                    <button class="btn-primary" onclick="showPage('exercises-page')">
+                        Passer aux exercices →
+                    </button>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Page des exercices -->
+    <div id="exercises-page" class="page">
+        <nav class="navbar">
+            <button onclick="showPage('home-page')">🏠 Accueil</button>
+            <span class="nav-title">Exercices interactifs</span>
+            <button onclick="showPage('course-page')">📖 Cours</button>
+        </nav>
+
+        <div class="exercises-container">
+            <h1>📝 Exercices interactifs</h1>
+            <p class="exercises-intro">Testez vos connaissances sur les algorithmes de parcours de graphes.</p>
+
+            <div class="exercise-graph-reference">
+                <h3>📊 Graphe de référence</h3>
+                <canvas id="exercise-graph" width="500" height="350"></canvas>
+            </div>
+
+            <!-- Exercice 1: BFS -->
+            <div class="exercise-card" id="ex1">
+                <h2>Exercice 1 : Parcours en largeur d'abord</h2>
+                <div class="exercise-content">
+                    <p><strong>À faire vous-même 2 :</strong> Appliquez l'algorithme du parcours en largeur d'abord au graphe ci-dessus. Le point de départ est le sommet <strong>A</strong>.</p>
+                    
+                    <div class="answer-section">
+                        <label>Entrez l'ordre de découverte (séparés par des virgules) :</label>
+                        <input type="text" id="ex1-answer" placeholder="Ex: A, B, F, C, D, G, H, E, I">
+                        <div class="button-group">
+                            <button onclick="checkExercise1()" class="btn-check">✓ Vérifier ma réponse</button>
+                            <button onclick="showSolution1()" class="btn-solution">👁 Voir la solution détaillée</button>
+                        </div>
+                    </div>
+                    
+                    <div id="ex1-feedback" class="feedback hidden"></div>
+                    <div id="ex1-solution" class="solution hidden">
+                        <h4>Solution détaillée :</h4>
+                        <p>En partant de A, un ordre de découverte possible est : <strong>A, B, F, C, D, G, H, E, I</strong></p>
+                        <p><em>Note : Ce n'est pas la seule solution possible car l'ordre des voisins peut varier.</em></p>
+                        
+                        <h5>Étapes détaillées :</h5>
+                        <ol>
+                            <li><strong>Étape 0 :</strong> s = A, A devient noir, File = [A]</li>
+                            <li><strong>Étape 1 :</strong> Défiler A, voisins de A = {B, F}, File = [B, F]</li>
+                            <li><strong>Étape 2 :</strong> Défiler B, voisins non noirs de B = {C, D, G}, File = [F, C, D, G]</li>
+                            <li><strong>Étape 3 :</strong> Défiler F, voisins non noirs de F = {H}, File = [C, D, G, H]</li>
+                            <li><strong>Étape 4 :</strong> Défiler C, voisins non noirs de C = {E}, File = [D, G, H, E]</li>
+                            <li><strong>Étape 5 :</strong> Défiler D, voisins non noirs de D = {I}, File = [G, H, E, I]</li>
+                            <li><strong>Étape 6 :</strong> Défiler G, tous les voisins sont noirs</li>
+                            <li><strong>Étape 7-9 :</strong> Défiler H, E, I (plus de nouveaux sommets)</li>
+                        </ol>
+                        
+                        <p><strong>Distance depuis A :</strong></p>
+                        <table>
+                            <tr><th>Sommet</th><td>A</td><td>B</td><td>F</td><td>C</td><td>D</td><td>G</td><td>H</td><td>E</td><td>I</td></tr>
+                            <tr><th>Distance</th><td>0</td><td>1</td><td>1</td><td>2</td><td>2</td><td>2</td><td>2</td><td>3</td><td>3</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exercice 2: DFS -->
+            <div class="exercise-card" id="ex2">
+                <h2>Exercice 2 : Parcours en profondeur d'abord</h2>
+                <div class="exercise-content">
+                    <p><strong>À faire vous-même 4 :</strong> Appliquez l'algorithme du parcours en profondeur d'abord au graphe ci-dessus. Le point de départ est le sommet <strong>A</strong>.</p>
+                    
+                    <div class="answer-section">
+                        <label>Entrez l'ordre de découverte (séparés par des virgules) :</label>
+                        <input type="text" id="ex2-answer" placeholder="Ex: A, B, C, E, I, D, G, F, H">
+                        <div class="button-group">
+                            <button onclick="checkExercise2()" class="btn-check">✓ Vérifier ma réponse</button>
+                            <button onclick="showSolution2()" class="btn-solution">👁 Voir la solution détaillée</button>
+                        </div>
+                    </div>
+                    
+                    <div id="ex2-feedback" class="feedback hidden"></div>
+                    <div id="ex2-solution" class="solution hidden">
+                        <h4>Solution détaillée :</h4>
+                        <p>En partant de A, un ordre de découverte possible est : <strong>A, B, C, E, I, D, G, F, H</strong></p>
+                        
+                        <h5>Explication du parcours :</h5>
+                        <ul>
+                            <li>On part de A, on va "le plus loin possible" : A → B → C → E → I</li>
+                            <li>De I, les voisins sont D, G (E déjà visité). On explore D.</li>
+                            <li>D est un "cul-de-sac" (B déjà visité, I déjà visité)</li>
+                            <li>On remonte et on explore G depuis I</li>
+                            <li>De G, on va vers F (B et I déjà visités)</li>
+                            <li>De F, on va vers H (A et G déjà visités)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exercice 3: Comparaison -->
+            <div class="exercise-card" id="ex3">
+                <h2>Exercice 3 : Comparaison BFS vs DFS</h2>
+                <div class="exercise-content">
+                    <p><strong>À faire vous-même 5 :</strong> Comparez les résultats obtenus.</p>
+                    
+                    <div class="quiz-question">
+                        <p>Quelle affirmation est correcte ?</p>
+                        <div class="quiz-options">
+                            <label>
+                                <input type="radio" name="ex3" value="a">
+                                Le BFS et le DFS donnent toujours le même ordre de découverte
+                            </label>
+                            <label>
+                                <input type="radio" name="ex3" value="b">
+                                Le BFS découvre les sommets par niveaux de distance, le DFS va "le plus loin possible"
+                            </label>
+                            <label>
+                                <input type="radio" name="ex3" value="c">
+                                Le DFS utilise une file et le BFS utilise une pile
+                            </label>
+                            <label>
+                                <input type="radio" name="ex3" value="d">
+                                Le BFS nécessite obligatoirement la récursivité
+                            </label>
+                        </div>
+                        <div class="button-group">
+                            <button onclick="checkExercise3()" class="btn-check">✓ Vérifier ma réponse</button>
+                            <button onclick="showSolution3()" class="btn-solution">👁 Voir la solution</button>
+                        </div>
+                    </div>
+                    
+                    <div id="ex3-feedback" class="feedback hidden"></div>
+                    <div id="ex3-solution" class="solution hidden">
+                        <h4>Solution :</h4>
+                        <p>La réponse correcte est <strong>B</strong>.</p>
+                        <ul>
+                            <li>BFS : découvre par niveaux de distance</li>
+                            <li>DFS : va "le plus loin possible" puis revient en arrière</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exercice 4: Cycle -->
+            <div class="exercise-card" id="ex4">
+                <h2>Exercice 4 : Détection de cycle</h2>
+                <div class="exercise-content">
+                    <p><strong>À faire vous-même 9 :</strong> Le graphe contient-il un cycle ?</p>
+                    
+                    <div class="quiz-question">
+                        <div class="quiz-options">
+                            <label>
+                                <input type="radio" name="ex4" value="true">
+                                Oui, le graphe contient au moins un cycle
+                            </label>
+                            <label>
+                                <input type="radio" name="ex4" value="false">
+                                Non, le graphe ne contient aucun cycle
+                            </label>
+                        </div>
+                        <div class="button-group">
+                            <button onclick="checkExercise4()" class="btn-check">✓ Vérifier ma réponse</button>
+                            <button onclick="showSolution4()" class="btn-solution">👁 Voir la solution</button>
+                        </div>
+                    </div>
+                    
+                    <div id="ex4-feedback" class="feedback hidden"></div>
+                    <div id="ex4-solution" class="solution hidden">
+                        <h4>Solution :</h4>
+                        <p>La réponse est <strong>Oui</strong>, le graphe contient plusieurs cycles.</p>
+                        <p>Exemples : A - B - G - F - A, B - G - I - D - B, etc.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exercice 5: Chaîne -->
+            <div class="exercise-card" id="ex5">
+                <h2>Exercice 5 : Recherche de chaîne</h2>
+                <div class="exercise-content">
+                    <p><strong>À faire vous-même 12 :</strong> Trouvez un chemin entre les sommets <strong>A</strong> et <strong>H</strong>.</p>
+                    
+                    <div class="answer-section">
+                        <label>Donnez une chaîne possible de A à H :</label>
+                        <input type="text" id="ex5-answer" placeholder="Ex: A, F, H">
+                        <div class="button-group">
+                            <button onclick="checkExercise5()" class="btn-check">✓ Vérifier ma réponse</button>
+                            <button onclick="showSolution5()" class="btn-solution">👁 Voir la solution</button>
+                        </div>
+                    </div>
+                    
+                    <div id="ex5-feedback" class="feedback hidden"></div>
+                    <div id="ex5-solution" class="solution hidden">
+                        <h4>Solution :</h4>
+                        <p>Plusieurs chaînes sont possibles de A à H :</p>
+                        <ul>
+                            <li><strong>A - F - H</strong> (le plus court)</li>
+                            <li>A - B - G - F - H</li>
+                            <li>A - B - G - I - H</li>
+                            <li>A - F - G - I - H</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="final-message">
+                <h2>🎉 Félicitations !</h2>
+                <p>Vous avez terminé tous les exercices sur les algorithmes de parcours de graphes.</p>
+                <button onclick="showPage('course-page')" class="btn-primary">← Retour au cours</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Cours NSI - Algorithmes de Parcours de Graphes | Auteur original : David Roche | Site interactif</p>
+    </footer>
+
+    <script>
+// ===== Définition du graphe =====
+const graph = {
+    'A': ['B', 'F'],
+    'B': ['A', 'C', 'D', 'G'],
+    'C': ['B', 'E'],
+    'D': ['B', 'I'],
+    'E': ['C', 'I'],
+    'F': ['A', 'G', 'H'],
+    'G': ['B', 'F', 'I'],
+    'H': ['F', 'I'],
+    'I': ['D', 'E', 'G', 'H']
+};
+
+const nodePositions = {
+    'A': { x: 250, y: 30 },
+    'B': { x: 100, y: 100 },
+    'F': { x: 400, y: 100 },
+    'C': { x: 30, y: 180 },
+    'D': { x: 170, y: 180 },
+    'G': { x: 280, y: 180 },
+    'H': { x: 450, y: 180 },
+    'E': { x: 80, y: 280 },
+    'I': { x: 250, y: 280 }
+};
+
+// ===== Navigation =====
+function showPage(pageId) {
+    document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+    document.getElementById(pageId).classList.add('active');
+    window.scrollTo(0, 0);
+    setTimeout(() => {
+        ['main-graph', 'bfs-graph', 'dfs-graph', 'dfs-iter-graph', 'cycle-graph', 'chain-graph', 'exercise-graph'].forEach(id => drawGraph(id));
+    }, 100);
+}
+
+function toggleContent(elementId) {
+    const element = document.getElementById(elementId);
+    element.classList.toggle('visible');
+    const btn = element.previousElementSibling.querySelector('.toggle-btn');
+    btn.textContent = element.classList.contains('visible') ? 'Masquer l\'algorithme' : 'Afficher l\'algorithme';
+}
+
+// ===== Dessin du graphe =====
+function drawGraph(canvasId, visitedNodes = [], currentNode = null, highlightedEdges = []) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    const scale = Math.min(width / 500, height / 320);
+    const offsetX = (width - 500 * scale) / 2;
+    const offsetY = (height - 320 * scale) / 2;
+    
+    function scalePos(pos) {
+        return { x: pos.x * scale + offsetX, y: pos.y * scale + offsetY };
+    }
+    
+    ctx.clearRect(0, 0, width, height);
+    
+    // Draw edges
+    const drawnEdges = new Set();
+    for (const node in graph) {
+        const pos1 = scalePos(nodePositions[node]);
+        for (const neighbor of graph[node]) {
+            const edgeKey = [node, neighbor].sort().join('-');
+            if (!drawnEdges.has(edgeKey)) {
+                drawnEdges.add(edgeKey);
+                const pos2 = scalePos(nodePositions[neighbor]);
+                const isHighlighted = highlightedEdges.some(e => 
+                    (e[0] === node && e[1] === neighbor) || (e[0] === neighbor && e[1] === node)
+                );
+                ctx.beginPath();
+                ctx.strokeStyle = isHighlighted ? '#22c55e' : '#94a3b8';
+                ctx.lineWidth = isHighlighted ? 4 : 2;
+                ctx.moveTo(pos1.x, pos1.y);
+                ctx.lineTo(pos2.x, pos2.y);
+                ctx.stroke();
+            }
+        }
+    }
+    
+    // Draw nodes
+    const nodeRadius = 22 * scale;
+    for (const node in nodePositions) {
+        const pos = scalePos(nodePositions[node]);
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, nodeRadius, 0, Math.PI * 2);
+        
+        if (node === currentNode) ctx.fillStyle = '#f59e0b';
+        else if (visitedNodes.includes(node)) ctx.fillStyle = '#1e293b';
+        else ctx.fillStyle = '#ffffff';
+        ctx.fill();
+        
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        ctx.fillStyle = visitedNodes.includes(node) || node === currentNode ? '#ffffff' : '#1e293b';
+        ctx.font = `bold ${14 * scale}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(node, pos.x, pos.y);
+    }
+}
+
+// ===== BFS Simulation =====
+let bfsState = { queue: [], visited: [], steps: [], currentStep: 0, running: false };
+
+function initBFS(startNode) {
+    const visited = new Set([startNode]);
+    const queue = [startNode];
+    const steps = [];
+    
+    steps.push({ queue: [...queue], visited: [startNode], explanation: `Init: ${startNode} noir, File = [${queue.join(', ')}]` });
+    
+    while (queue.length > 0) {
+        const current = queue.shift();
+        steps.push({ queue: [...queue], visited: [...visited], explanation: `Défiler ${current}. File = [${queue.join(', ') || 'vide'}]` });
+        
+        for (const neighbor of graph[current].filter(n => !visited.has(n))) {
+            visited.add(neighbor);
+            queue.push(neighbor);
+            steps.push({ queue: [...queue], visited: [...visited], explanation: `${neighbor} voisin non visité → enfiler. File = [${queue.join(', ')}]` });
+        }
+    }
+    
+    steps.push({ queue: [], visited: [...visited], explanation: `Terminé ! Ordre : ${[...visited].join(' → ')}` });
+    bfsState = { steps, currentStep: 0, running: true };
+}
+
+function startBFSSimulation() { initBFS(document.getElementById('bfs-start').value); updateBFSDisplay(); }
+function stepBFS() { if (bfsState.running && bfsState.currentStep < bfsState.steps.length - 1) { bfsState.currentStep++; updateBFSDisplay(); } }
+function resetBFSSimulation() { 
+    bfsState = { queue: [], visited: [], steps: [], currentStep: 0, running: false };
+    document.getElementById('bfs-queue').innerHTML = '';
+    document.getElementById('bfs-visited').innerHTML = '';
+    document.getElementById('bfs-explanation').innerHTML = '';
+    drawGraph('bfs-graph');
+}
+
+function updateBFSDisplay() {
+    const step = bfsState.steps[bfsState.currentStep];
+    document.getElementById('bfs-queue').innerHTML = step.queue.map(n => `<span class="queue-item">${n}</span>`).join('');
+    document.getElementById('bfs-visited').innerHTML = step.visited.map(n => `<span class="visited-item">${n}</span>`).join('');
+    document.getElementById('bfs-explanation').innerHTML = `<strong>Étape ${bfsState.currentStep}:</strong> ${step.explanation}`;
+    drawGraph('bfs-graph', step.visited);
+}
+
+// ===== DFS Simulation (Recursive) =====
+let dfsState = { stack: [], visited: [], steps: [], currentStep: 0, running: false };
+
+function initDFS(startNode) {
+    const visited = new Set();
+    const steps = [];
+    const callStack = [];
+    
+    function dfs(node) {
+        visited.add(node);
+        callStack.push(node);
+        steps.push({ stack: [...callStack], visited: [...visited], explanation: `DFS(${node}): marquer noir. Pile = [${callStack.join(', ')}]` });
+        
+        for (const neighbor of graph[node]) {
+            if (!visited.has(neighbor)) {
+                steps.push({ stack: [...callStack], visited: [...visited], explanation: `Explorer voisin ${neighbor}` });
+                dfs(neighbor);
+            }
+        }
+        
+        callStack.pop();
+        if (callStack.length > 0) {
+            steps.push({ stack: [...callStack], visited: [...visited], explanation: `Retour depuis ${node}. Pile = [${callStack.join(', ') || 'vide'}]` });
+        }
+    }
+    
+    steps.push({ stack: [], visited: [], explanation: `Début DFS depuis ${startNode}` });
+    dfs(startNode);
+    steps.push({ stack: [], visited: [...visited], explanation: `Terminé ! Ordre : ${[...visited].join(' → ')}` });
+    dfsState = { steps, currentStep: 0, running: true };
+}
+
+function startDFSSimulation() { initDFS(document.getElementById('dfs-start').value); updateDFSDisplay(); }
+function stepDFS() { if (dfsState.running && dfsState.currentStep < dfsState.steps.length - 1) { dfsState.currentStep++; updateDFSDisplay(); } }
+function resetDFSSimulation() {
+    dfsState = { stack: [], visited: [], steps: [], currentStep: 0, running: false };
+    document.getElementById('dfs-stack').innerHTML = '';
+    document.getElementById('dfs-visited').innerHTML = '';
+    document.getElementById('dfs-explanation').innerHTML = '';
+    drawGraph('dfs-graph');
+}
+
+function updateDFSDisplay() {
+    const step = dfsState.steps[dfsState.currentStep];
+    document.getElementById('dfs-stack').innerHTML = step.stack.map(n => `<span class="stack-item">${n}</span>`).join('');
+    document.getElementById('dfs-visited').innerHTML = step.visited.map(n => `<span class="visited-item">${n}</span>`).join('');
+    document.getElementById('dfs-explanation').innerHTML = `<strong>Étape ${dfsState.currentStep}:</strong> ${step.explanation}`;
+    drawGraph('dfs-graph', step.visited);
+}
+
+// ===== DFS Iterative Simulation =====
+let dfsIterState = { stack: [], visited: [], steps: [], currentStep: 0, running: false };
+
+function initDFSIter(startNode) {
+    const visited = new Set([startNode]);
+    const stack = [startNode];
+    const steps = [];
+    
+    steps.push({ stack: [...stack], visited: [startNode], explanation: `Init: ${startNode} noir, empilé. Pile = [${stack.join(', ')}]` });
+    
+    while (stack.length > 0) {
+        const current = stack.pop();
+        steps.push({ stack: [...stack], visited: [...visited], explanation: `Dépiler ${current}. Pile = [${stack.join(', ') || 'vide'}]` });
+        
+        for (const neighbor of [...graph[current]].reverse().filter(n => !visited.has(n))) {
+            visited.add(neighbor);
+            stack.push(neighbor);
+            steps.push({ stack: [...stack], visited: [...visited], explanation: `${neighbor} voisin non visité → empiler. Pile = [${stack.join(', ')}]` });
+        }
+    }
+    
+    steps.push({ stack: [], visited: [...visited], explanation: `Terminé ! Ordre : ${[...visited].join(' → ')}` });
+    dfsIterState = { steps, currentStep: 0, running: true };
+}
+
+function startDFSIterSimulation() { initDFSIter(document.getElementById('dfs-iter-start').value); updateDFSIterDisplay(); }
+function stepDFSIter() { if (dfsIterState.running && dfsIterState.currentStep < dfsIterState.steps.length - 1) { dfsIterState.currentStep++; updateDFSIterDisplay(); } }
+function resetDFSIterSimulation() {
+    dfsIterState = { stack: [], visited: [], steps: [], currentStep: 0, running: false };
+    document.getElementById('dfs-iter-stack').innerHTML = '';
+    document.getElementById('dfs-iter-visited').innerHTML = '';
+    document.getElementById('dfs-iter-explanation').innerHTML = '';
+    drawGraph('dfs-iter-graph');
+}
+
+function updateDFSIterDisplay() {
+    const step = dfsIterState.steps[dfsIterState.currentStep];
+    document.getElementById('dfs-iter-stack').innerHTML = step.stack.map(n => `<span class="stack-item">${n}</span>`).join('');
+    document.getElementById('dfs-iter-visited').innerHTML = step.visited.map(n => `<span class="visited-item">${n}</span>`).join('');
+    document.getElementById('dfs-iter-explanation').innerHTML = `<strong>Étape ${dfsIterState.currentStep}:</strong> ${step.explanation}`;
+    drawGraph('dfs-iter-graph', step.visited);
+}
+
+// ===== Cycle Detection Simulation =====
+let cycleState = { stack: [], visited: [], steps: [], currentStep: 0, running: false };
+
+function initCycle(startNode) {
+    const visited = new Set();
+    const stack = [startNode];
+    const steps = [];
+    let cycleFound = false;
+    
+    steps.push({ stack: [...stack], visited: [], cycleFound: false, explanation: `Init: empiler ${startNode}. Pile = [${stack.join(', ')}]` });
+    
+    while (stack.length > 0 && !cycleFound) {
+        const current = stack.pop();
+        steps.push({ stack: [...stack], visited: [...visited], cycleFound: false, explanation: `Dépiler ${current}` });
+        
+        for (const neighbor of graph[current].filter(n => !visited.has(n))) {
+            stack.push(neighbor);
+        }
+        
+        if (visited.has(current)) {
+            cycleFound = true;
+            steps.push({ stack: [...stack], visited: [...visited], cycleFound: true, explanation: `⚠️ ${current} déjà noir ! CYCLE DÉTECTÉ ! → Vrai` });
+        } else {
+            visited.add(current);
+            steps.push({ stack: [...stack], visited: [...visited], cycleFound: false, explanation: `${current} pas noir → marquer noir` });
+        }
+    }
+    
+    if (!cycleFound) {
+        steps.push({ stack: [], visited: [...visited], cycleFound: false, explanation: `Pas de cycle trouvé → Faux` });
+    }
+    
+    cycleState = { steps, currentStep: 0, running: true };
+}
+
+function startCycleSimulation() { initCycle(document.getElementById('cycle-start').value); updateCycleDisplay(); }
+function stepCycle() { if (cycleState.running && cycleState.currentStep < cycleState.steps.length - 1) { cycleState.currentStep++; updateCycleDisplay(); } }
+function resetCycleSimulation() {
+    cycleState = { stack: [], visited: [], steps: [], currentStep: 0, running: false };
+    document.getElementById('cycle-stack').innerHTML = '';
+    document.getElementById('cycle-result').innerHTML = 'En attente...';
+    document.getElementById('cycle-result').className = 'result';
+    document.getElementById('cycle-explanation').innerHTML = '';
+    drawGraph('cycle-graph');
+}
+
+function updateCycleDisplay() {
+    const step = cycleState.steps[cycleState.currentStep];
+    document.getElementById('cycle-stack').innerHTML = step.stack.map(n => `<span class="stack-item">${n}</span>`).join('');
+    const resultDiv = document.getElementById('cycle-result');
+    if (step.cycleFound) { resultDiv.innerHTML = '🔄 CYCLE DÉTECTÉ !'; resultDiv.className = 'result failure'; }
+    else if (step.explanation.includes('Pas de cycle')) { resultDiv.innerHTML = '✅ Pas de cycle'; resultDiv.className = 'result success'; }
+    else { resultDiv.innerHTML = 'Analyse en cours...'; resultDiv.className = 'result'; }
+    document.getElementById('cycle-explanation').innerHTML = `<strong>Étape ${cycleState.currentStep}:</strong> ${step.explanation}`;
+    drawGraph('cycle-graph', step.visited);
+}
+
+// ===== Chain Finding Simulation =====
+let chainState = { chain: [], steps: [], currentStep: 0, running: false };
+
+function initChain(startNode, endNode) {
+    const steps = [];
+    let found = false;
+    
+    function findChain(current, end, path, visited) {
+        const newPath = [...path, current];
+        visited.add(current);
+        steps.push({ chain: [...newPath], explanation: `Visiter ${current}. Chaîne : ${newPath.join(' → ')}` });
+        
+        if (current === end) {
+            found = true;
+            steps.push({ chain: [...newPath], found: true, explanation: `🎯 Destination ${end} atteinte ! Chaîne : ${newPath.join(' → ')}` });
+            return true;
+        }
+        
+        for (const neighbor of graph[current]) {
+            if (!visited.has(neighbor)) {
+                if (findChain(neighbor, end, newPath, visited)) return true;
+            }
+        }
+        
+        steps.push({ chain: [...path], explanation: `Impasse depuis ${current}. Retour.` });
+        return false;
+    }
+    
+    steps.push({ chain: [], explanation: `Recherche de chaîne : ${startNode} → ${endNode}` });
+    findChain(startNode, endNode, [], new Set());
+    
+    if (!found) {
+        steps.push({ chain: [], found: false, explanation: `Aucune chaîne trouvée.` });
+    }
+    
+    chainState = { steps, currentStep: 0, running: true };
+}
+
+function startChainSimulation() { 
+    initChain(document.getElementById('chain-start').value, document.getElementById('chain-end').value); 
+    updateChainDisplay(); 
+}
+function stepChain() { if (chainState.running && chainState.currentStep < chainState.steps.length - 1) { chainState.currentStep++; updateChainDisplay(); } }
+function resetChainSimulation() {
+    chainState = { chain: [], steps: [], currentStep: 0, running: false };
+    document.getElementById('chain-path').innerHTML = '';
+    document.getElementById('chain-result').innerHTML = 'En attente...';
+    document.getElementById('chain-result').className = 'result';
+    document.getElementById('chain-explanation').innerHTML = '';
+    drawGraph('chain-graph');
+}
+
+function updateChainDisplay() {
+    const step = chainState.steps[chainState.currentStep];
+    document.getElementById('chain-path').innerHTML = step.chain.map(n => `<span class="chain-item">${n}</span>`).join(' → ');
+    const resultDiv = document.getElementById('chain-result');
+    if (step.found === true) { resultDiv.innerHTML = '✅ Chaîne trouvée !'; resultDiv.className = 'result success'; }
+    else if (step.found === false) { resultDiv.innerHTML = '❌ Aucune chaîne'; resultDiv.className = 'result failure'; }
+    else { resultDiv.innerHTML = 'Recherche...'; resultDiv.className = 'result'; }
+    document.getElementById('chain-explanation').innerHTML = `<strong>Étape ${chainState.currentStep}:</strong> ${step.explanation}`;
+    
+    const edges = [];
+    for (let i = 0; i < step.chain.length - 1; i++) {
+        edges.push([step.chain[i], step.chain[i + 1]]);
+    }
+    drawGraph('chain-graph', step.chain, null, edges);
+}
+
+// ===== Exercices =====
+function checkExercise1() {
+    const answer = document.getElementById('ex1-answer').value.toUpperCase().replace(/\s/g, '');
+    const feedback = document.getElementById('ex1-feedback');
+    const nodes = answer.split(',');
+    const allNodes = new Set(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']);
+    
+    if (nodes.length !== 9) feedback.innerHTML = '❌ 9 sommets requis.';
+    else if (nodes[0] !== 'A') feedback.innerHTML = '❌ Doit commencer par A.';
+    else if (!nodes.every(n => allNodes.has(n))) feedback.innerHTML = '❌ Sommets invalides.';
+    else if (new Set(nodes).size !== 9) feedback.innerHTML = '❌ Chaque sommet une seule fois.';
+    else {
+        const expectedDistances = { A: 0, B: 1, F: 1, C: 2, D: 2, G: 2, H: 2, E: 3, I: 3 };
+        let valid = true, lastDist = 0;
+        for (const node of nodes) {
+            if (expectedDistances[node] < lastDist) { valid = false; break; }
+            lastDist = expectedDistances[node];
+        }
+        if (valid) { feedback.innerHTML = '✅ Correct ! BFS valide.'; feedback.className = 'feedback correct'; }
+        else { feedback.innerHTML = '⚠️ L\'ordre ne respecte pas BFS.'; feedback.className = 'feedback partial'; }
+    }
+    if (!feedback.innerHTML.startsWith('✅')) feedback.className = 'feedback incorrect';
+    feedback.classList.remove('hidden');
+}
+
+function showSolution1() { document.getElementById('ex1-solution').classList.remove('hidden'); }
+
+function checkExercise2() {
+    const answer = document.getElementById('ex2-answer').value.toUpperCase().replace(/\s/g, '');
+    const feedback = document.getElementById('ex2-feedback');
+    const nodes = answer.split(',');
+    const allNodes = new Set(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']);
+    
+    if (nodes.length !== 9) { feedback.innerHTML = '❌ 9 sommets requis.'; feedback.className = 'feedback incorrect'; }
+    else if (nodes[0] !== 'A') { feedback.innerHTML = '❌ Doit commencer par A.'; feedback.className = 'feedback incorrect'; }
+    else if (!nodes.every(n => allNodes.has(n))) { feedback.innerHTML = '❌ Sommets invalides.'; feedback.className = 'feedback incorrect'; }
+    else if (new Set(nodes).size !== 9) { feedback.innerHTML = '❌ Chaque sommet une seule fois.'; feedback.className = 'feedback incorrect'; }
+    else { feedback.innerHTML = '✅ Correct ! DFS valide.'; feedback.className = 'feedback correct'; }
+    feedback.classList.remove('hidden');
+}
+
+function showSolution2() { document.getElementById('ex2-solution').classList.remove('hidden'); }
+
+function checkExercise3() {
+    const selected = document.querySelector('input[name="ex3"]:checked');
+    const feedback = document.getElementById('ex3-feedback');
+    if (!selected) { feedback.innerHTML = '⚠️ Sélectionnez une réponse.'; feedback.className = 'feedback partial'; }
+    else if (selected.value === 'b') { feedback.innerHTML = '✅ Correct !'; feedback.className = 'feedback correct'; }
+    else { feedback.innerHTML = '❌ Incorrect.'; feedback.className = 'feedback incorrect'; }
+    feedback.classList.remove('hidden');
+}
+
+function showSolution3() { document.getElementById('ex3-solution').classList.remove('hidden'); }
+
+function checkExercise4() {
+    const selected = document.querySelector('input[name="ex4"]:checked');
+    const feedback = document.getElementById('ex4-feedback');
+    if (!selected) { feedback.innerHTML = '⚠️ Sélectionnez une réponse.'; feedback.className = 'feedback partial'; }
+    else if (selected.value === 'true') { feedback.innerHTML = '✅ Correct ! Le graphe contient des cycles.'; feedback.className = 'feedback correct'; }
+    else { feedback.innerHTML = '❌ Incorrect. Le graphe contient bien des cycles.'; feedback.className = 'feedback incorrect'; }
+    feedback.classList.remove('hidden');
+}
+
+function showSolution4() { document.getElementById('ex4-solution').classList.remove('hidden'); }
+
+function checkExercise5() {
+    const answer = document.getElementById('ex5-answer').value.toUpperCase().replace(/\s/g, '');
+    const feedback = document.getElementById('ex5-feedback');
+    const nodes = answer.split(',');
+    
+    if (nodes.length < 2) { feedback.innerHTML = '❌ Au moins 2 sommets.'; feedback.className = 'feedback incorrect'; }
+    else if (nodes[0] !== 'A') { feedback.innerHTML = '❌ Doit commencer par A.'; feedback.className = 'feedback incorrect'; }
+    else if (nodes[nodes.length - 1] !== 'H') { feedback.innerHTML = '❌ Doit finir par H.'; feedback.className = 'feedback incorrect'; }
+    else {
+        let valid = true;
+        for (let i = 0; i < nodes.length - 1; i++) {
+            if (!graph[nodes[i]] || !graph[nodes[i]].includes(nodes[i + 1])) {
+                valid = false;
+                feedback.innerHTML = `❌ Pas d'arête entre ${nodes[i]} et ${nodes[i + 1]}.`;
+                break;
+            }
+        }
+        if (valid) { feedback.innerHTML = `✅ Correct ! ${nodes.join(' → ')} est valide.`; feedback.className = 'feedback correct'; }
+        else feedback.className = 'feedback incorrect';
+    }
+    feedback.classList.remove('hidden');
+}
+
+function showSolution5() { document.getElementById('ex5-solution').classList.remove('hidden'); }
+
+// ===== Initialisation =====
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        ['main-graph', 'bfs-graph', 'dfs-graph', 'dfs-iter-graph', 'cycle-graph', 'chain-graph', 'exercise-graph'].forEach(id => drawGraph(id));
+    }, 100);
+});
+
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+});
+    </script>
+</body>
+</html>
